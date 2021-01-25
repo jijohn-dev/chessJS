@@ -7,9 +7,15 @@ function handleMouseDown(e) {
     let squareX = Math.floor(mouseX / 100);
     let squareY = Math.floor(mouseY / 100);        
 
-    // check if square has a piece        
+    // reflect square for black
+    if (color === "black") {
+        squareX = 7 - squareX;
+        squareY = 7 - squareY;
+    }
+
+    // check if square has a piece and is user's color       
     pieces.forEach((p, index) => {
-        if (p.boardX === squareX && p.boardY === squareY) {                
+        if (p.boardX === squareX && p.boardY === squareY && p.color === color) {                
             selected = true;
             pieceIdx = index;
         }
@@ -40,6 +46,12 @@ function handleMouseUp(e) {
         // get square
         let squareX = Math.floor(mouseX / 100);
         let squareY = Math.floor(mouseY / 100);
+
+        // reflect for black
+        if (color === "black") {
+            squareX = 7 - squareX;
+            squareY = 7 - squareY;
+        }
 
         let occupied = false;
         let moveMade = false;
@@ -101,6 +113,8 @@ function handleMouseUp(e) {
             saveState();
             changeToMove();                                
             console.log(notation);
+            // send move to server
+            socket.emit("move", {pieces, toMove});
         }            
     }
 }

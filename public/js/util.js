@@ -1,3 +1,8 @@
+// perform move
+function makeMove(move) {
+
+}
+
 // draw the board
 function drawBoard() {  
     ctx.fillStyle = darkColor;
@@ -19,10 +24,17 @@ function drawPiece(x, y, i, j, dx, dy) {
     ctx.drawImage(sprites, x * size, y * size, size, size, i * size + dx, j * size + dy, size, size);
 }
 
-function drawPieces() {
-    pieces.forEach((p) => {
-        drawPiece(p.spriteX, p.spriteY, p.boardX, p.boardY, p.offsetX, p.offsetY);
-    })
+function drawPieces() {    
+    if (color === "white") {
+        pieces.forEach((p) => {
+            drawPiece(p.spriteX, p.spriteY, p.boardX, p.boardY, p.offsetX, p.offsetY);
+        });
+    }
+    else {
+        pieces.forEach((p) => {
+            drawPiece(p.spriteX, p.spriteY, 7 - p.boardX, 7 - p.boardY, p.offsetX, p.offsetY);
+        });
+    }
 }
 
 function createPiece(color, name, spriteX, spriteY, boardX, boardY) {
