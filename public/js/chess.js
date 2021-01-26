@@ -39,6 +39,7 @@ socket.on('created', gameId => {
     const html = `<p>Game ID: ${gameId}</p>`;
     $messages.insertAdjacentHTML('beforeend', html);
 
+    // initialize game
     startGame();
 })
 
@@ -126,17 +127,23 @@ function startGame() {
 
     // mouse up
     canvas.addEventListener('mouseup', handleMouseUp);
-
-    canvas.addEventListener('mousemove', handleMouseMove);    
+    
+    // mouse move
+    canvas.addEventListener('mousemove', handleMouseMove);
 }
 
 // listen for moves from the server
 socket.on('move', update => {
-    console.log('Received move from server');
+    console.log(`${update.notation} received from server`);
     // update pieces array
     pieces = update.pieces;
     toMove = update.toMove;
     saveState();    
     drawBoard();
     drawPieces();
+})
+
+// handle illegal move message from server
+socket.on('illegalMove', update => {
+    alert(`Illegal move: ${update.notation}`)
 })

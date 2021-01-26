@@ -2,7 +2,9 @@ const express = require('express')
 const http = require('http')
 const path = require('path')
 const socketio = require('socket.io')
-const { v4: uuidv4 } = require('uuid');
+const { v4: uuidv4 } = require('uuid')
+
+require('../public/js/legalMove')
 
 const app = express()
 const server = http.createServer(app)
@@ -15,62 +17,72 @@ const port = process.env.PORT || 3000
 app.use(express.static(publicDirectoryPath))
 
 // store users
-const users = [];
+const users = []
 
 // store game states
-const games = [];
+const games = []
 
 io.on('connection', (socket) => {
-	console.log('New Websocket connection');
+	console.log('New Websocket connection')
 	
 	// create new game
 	socket.on('create', options => {
-		const { error, user } = createGame({ id: socket.id, ...options });
+		const { error, user } = createGame({ id: socket.id, ...options })
 
 		if (error) {
-			return callback(error);
+			return callback(error)
 		}
 
-		socket.emit('created', user.room);
-		socket.emit('message', `Playing as the ${options.color} pieces`);
-		socket.emit('message', `Wating for opponent...`);
+		socket.emit('created', user.room)
+		socket.emit('message', `Playing as the ${options.color} pieces`)
+		socket.emit('message', `Wating for opponent...`)
 		
-		socket.join(user.room);
+		socket.join(user.room)
 	})
 
 	// join existing game
 	socket.on('join', (options, callback) => {
-		const { error, user } = joinGame({ id: socket.id, ...options });
+		const { error, user } = joinGame({ id: socket.id, ...options })
 		
 		if (error) {
-			return callback(error);
+			return callback(error)
 		}
 
 		// send user joined message
-		io.to(user.room).emit('message', `${user.username} has joined`);
+		io.to(user.room).emit('message', `${user.username} has joined`)
 
 		// send game ID to client
-		socket.emit('joined', { ...user });
-		socket.emit('message', `Joined ${user.opponent}`);
-		socket.emit('message', `Playing as the ${user.color} pieces`);		
+		socket.emit('joined', { ...user })
+		socket.emit('message', `Joined ${user.opponent}`)
+		socket.emit('message', `Playing as the ${user.color} pieces`)
 
-		socket.join(user.room);
+		socket.join(user.room)
 	})
 
 	// move
 	socket.on('move', update => {
-		console.log('move received');
+		console.log(`move received: ${update.notation}`)		
 
-		const user = getUser(socket.id);
+		// validate move
+		// if (!legalMove(update.notation)) {
+		// 	console.log('illegal move')
+		// 	socket.emit('illegalMove', update)
+		// }
+		// else {
+		// 	// send move to room
+		// 	const user = getUser(socket.id)		
+		// 	io.to(user.room).emit('move', update)
+		// }	
 
-		io.to(user.room).emit('move', update);
+		const user = getUser(socket.id)		
+		io.to(user.room).emit('move', update)
 	})
 
 	// chat messages
 	socket.on('sendMessage', (msg, callback) => {
-		const user = getUser(socket.id);
-		io.to(user.room).emit('message', `${user.username}: ` + msg);
-		callback('Delivered');
+		const user = getUser(socket.id)
+		io.to(user.room).emit('message', `${user.username}: ` + msg)
+		callback('Delivered')
 	})
 })
 
@@ -80,12 +92,12 @@ server.listen(port, () => {
 
 
 const createGame = ({ id, username, color }) => {
-	username = username.trim().toLowerCase();
+	username = username.trim().toLowerCase()
 	// generate game ID
-	const gameId = uuidv4();
+	const gameId = uuidv4()
 
-	const user = { id, username, room: gameId };
-	users.push(user);
+	const user = { id, username, room: gameId }
+	users.push(user)
 
 	// create server game state
 	let game = {
@@ -96,51 +108,51 @@ const createGame = ({ id, username, color }) => {
 		status: 'active'
 	}
 	if (color === 'white') {
-		game.white = username;
+		game.white = username
 	}
 	if (color === 'black') {
-		game.black = username;
+		game.black = username
 	}
-	games.push(game);
+	games.push(game)
 
-	return { user };
+	return { user }
 }
 
 const joinGame = ({ id, username, gameId }) => {
-	username = username.trim().toLowerCase();
-	const room = gameId;
-	let color;
-	let opponent;
+	username = username.trim().toLowerCase()
+	const room = gameId
+	let color
+	let opponent
 
-	let gameFound = false;
+	let gameFound = false
 
 	games.forEach(game => {
 		if (game.id === gameId) {
-			gameFound = true;
+			gameFound = true
 			if (game.white) {
-				game.black = username;
-				color = "black";
-				opponent = game.white;
+				game.black = username
+				color = "black"
+				opponent = game.white
 			}
 			else {
-				game.white = username;
-				color = "white";
-				opponent = game.black;
+				game.white = username
+				color = "white"
+				opponent = game.black
 			}
 			console.log(game);
 		}
 	})
 
 	if (!gameFound) {
-		const error = "Game not found";
+		const error = "Game not found"
 		return { error };
 	}
 
-	const user = { id, username, room, color, opponent };	
-	users.push(user);
-	return { user };
+	const user = { id, username, room, color, opponent }	
+	users.push(user)
+	return { user }
 }
 
 const getUser = id => {
-	return users.find(user => user.id === id);
+	return users.find(user => user.id === id)
 }
