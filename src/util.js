@@ -1,19 +1,16 @@
-// perform move
-function makeMove(move) {
-
-}
+import { state } from './gameState'
 
 // draw the board
 function drawBoard() {  
-    ctx.fillStyle = darkColor;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    state.ctx.fillStyle = 'darkolivegreen';
+    state.ctx.fillRect(0, 0, state.canvas.width, state.canvas.height);
 
     // draw light squares
-    ctx.fillStyle = lightColor;
+    state.ctx.fillStyle = 'beige';
     for (let i = 0; i < 8; i++) {
         for (let j = 0; j < 8; j++) {
             if ((i+j) % 2 == 0) {
-                ctx.fillRect(100 * i, 100 * j, 100, 100);
+                state.ctx.fillRect(100 * i, 100 * j, 100, 100);
             }
         }
     }
@@ -21,24 +18,25 @@ function drawBoard() {
 
 // sx, sy, dx, dy
 function drawPiece(x, y, i, j, dx, dy) {
-    ctx.drawImage(sprites, x * size, y * size, size, size, i * size + dx, j * size + dy, size, size);
+    let size = state.size
+    state.ctx.drawImage(state.sprites, x * size, y * size, size, size, i * size + dx, j * size + dy, size, size);
 }
 
 function drawPieces() {    
-    if (color === "white") {
-        pieces.forEach((p) => {
+    if (state.color === "white") {
+        state.pieces.forEach((p) => {
             drawPiece(p.spriteX, p.spriteY, p.boardX, p.boardY, p.offsetX, p.offsetY);
         });
     }
     else {
-        pieces.forEach((p) => {
+        state.pieces.forEach((p) => {
             drawPiece(p.spriteX, p.spriteY, 7 - p.boardX, 7 - p.boardY, p.offsetX, p.offsetY);
         });
     }
 }
 
 function createPiece(color, name, spriteX, spriteY, boardX, boardY) {
-    pieces.push({
+    state.pieces.push({
         color,
         name,
         spriteX,
@@ -52,13 +50,13 @@ function createPiece(color, name, spriteX, spriteY, boardX, boardY) {
     })
 }
 
-function changeToMove() {
-    if (toMove === "white") {
-        toMove = "black";
+function changeToMove() {    
+    if (state.toMove === "white") {
+        state.toMove = "black";
     }
     else {
-        toMove = "white";
-    }
+        state.toMove = "white";
+    }    
 }
 
 function idxToSquare(x, y) {
@@ -69,35 +67,35 @@ function idxToSquare(x, y) {
 
 function saveState() {
     let newState = [];
-    pieces.forEach(p => {
+    state.pieces.forEach(p => {
         let copy = JSON.parse(JSON.stringify(p));
         newState.push(copy);
     })
-    history.push(newState);
+    state.history.push(newState);
 }
 
 function loadState() {
-    pieces = [];
-    history[history.length - 1].forEach(p => {
+    state.pieces = [];
+    state.history[state.history.length - 1].forEach(p => {
         pieces.push(JSON.parse(JSON.stringify(p)));
     })
 }
 
 function resetGame() {
-    pieces = [];
+    state.pieces = [];
     initializePieces();
-    history = [];     
+    state.history = [];     
     saveState();
     drawBoard();
     drawPieces();
-    toMove = "white";
+    state.toMove = "white";
     console.log("reset");
 }
 
 function undoMove() {
     console.log("undo");
-    if (history.length > 1) {
-        history.pop();
+    if (state.history.length > 1) {
+        state.history.pop();
         loadState();
         drawBoard();
         drawPieces();
@@ -137,4 +135,13 @@ function initializePieces() {
     // queens
     createPiece("white", "queen", 2, 2, 3, 7);
     createPiece("black", "queen", 3, 2, 3, 0);
+}
+
+export {
+    initializePieces,
+    saveState,
+    drawBoard,
+    drawPieces,
+    idxToSquare,
+    changeToMove
 }

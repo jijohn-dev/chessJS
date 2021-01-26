@@ -1,30 +1,38 @@
+import { state } from './gameState'
+import { socket } from './connection'
+import { handleMouseDown, handleMouseUp, handleMouseMove } from './userInput'
+import { 
+    initializePieces, 
+    saveState, 
+    drawBoard,
+    drawPieces
+} from './util'
+import { checkmate } from './legalMove'
+
+var qs = require('qs')
+
 // message elements
-const $messageForm = document.querySelector('#message-form');
-const $messageFormInput = document.querySelector('input');
-const $messageFormButton = document.querySelector('button');
-const $messages = document.querySelector('#messages');
+const $messageForm = document.querySelector('#message-form')
+const $messageFormInput = document.querySelector('input')
+const $messageFormButton = document.querySelector('button')
+const $messages = document.querySelector('#messages')
 
-// assign color
-let color;
-
-// socket 
-const socket = io();
-
-const query = Qs.parse(location.search, { ignoreQueryPrefix: true });
+const query = qs.parse(location.search, { ignoreQueryPrefix: true })
 
 // join game
 if (query.gameId) {    
-    const { username, gameId } = query;
+    const { username, gameId } = query
     socket.emit('join', { username, gameId }, (error) => {
         if (error) {
-            alert(error);
-            location.href = '/';
+            alert(error)
+            location.href = '/'
         }
     })
 }
 else {
     // create game
-    color = query.color;
+    state.color = query.color;
+    let color = state.color
     const username = query.username;
     socket.emit('create', { username, color}, error => {
         if (error) {
@@ -46,8 +54,8 @@ socket.on('created', gameId => {
 socket.on('joined', gameInfo => {
     const html = `<p>Game ID: ${gameInfo.id}</p>`;
     $messages.insertAdjacentHTML('beforeend', html);
-    color = gameInfo.color;
-    console.log(color);
+    state.color = gameInfo.color;
+    console.log(state.color);
 
     // initialize game
     startGame();
@@ -78,73 +86,52 @@ $messageForm.addEventListener('submit', e => {
     })
 })
 
-// chess game and graphics
-let canvas;
-let ctx;
-
-const lightColor = 'beige';
-const darkColor = 'darkolivegreen';
-
-const size = 100;
-
-// pieces array
-let pieces = [];
+// initialize game
 initializePieces();
-
-// game state
-let history = [];
 saveState();
-let toMove = "white";
-
-// click and drag logic    
-let selected = false;
-let pieceIdx;
-
-let lastX = 0;
-let lastY = 0;
 
 function startGame() {
-    canvas = document.getElementById('gameCanvas');
-    ctx = canvas.getContext('2d');
+    state.canvas = document.getElementById('gameCanvas');
+    state.ctx = state.canvas.getContext('2d');
 
     // draw
     drawBoard();    
 
     // load spritesheet
-    sprites = new Image();
-    sprites.src = 'assets/spritesheet.png';
-    sprites.onload = () => {
+    state.sprites = new Image();
+    state.sprites.src = 'assets/spritesheet.png';
+    state.sprites.onload = () => {
         drawPieces();
     }     
 
     // mouse down
-    canvas.addEventListener('mousedown', handleMouseDown);
+    state.canvas.addEventListener('mousedown', handleMouseDown);
 
     // right click
-    canvas.addEventListener('contextmenu', e => {
+    state.canvas.addEventListener('contextmenu', e => {
         e.preventDefault();
     })
 
     // mouse up
-    canvas.addEventListener('mouseup', handleMouseUp);
+    state.canvas.addEventListener('mouseup', handleMouseUp);
     
     // mouse move
-    canvas.addEventListener('mousemove', handleMouseMove);
+    state.canvas.addEventListener('mousemove', handleMouseMove);
 }
 
 // listen for moves from the server
 socket.on('move', update => {
-    console.log(`${update.notation} received from server`);
+    console.log(`${update.notation} received from server`)
     // update pieces array
-    pieces = update.pieces;
-    toMove = update.toMove;
-    saveState();    
-    drawBoard();
-    drawPieces();
+    state.pieces = update.pieces
+    state.toMove = update.toMove    
+    saveState()    
+    drawBoard()
+    drawPieces()
     // detect checkmate
-    const king = pieces.find(p => p.name === "king" && p.color === color)
-    if (checkmate(pieces, king)) {
-        alert("checkmate")
+    const king = state.pieces.find(p => p.name === "king" && p.color === state.color)
+    if (checkmate(state.pieces, king)) {
+        alert("checkmate")        
     }
 })
 

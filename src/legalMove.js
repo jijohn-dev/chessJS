@@ -1,3 +1,5 @@
+import { state } from './gameState'
+
 function legalMove(pieces, piece, targetX, targetY) {
     let valid = canMove(pieces, piece, targetX, targetY)
     if (!valid) {
@@ -11,12 +13,11 @@ function legalMove(pieces, piece, targetX, targetY) {
     piece.boardX = targetX
     piece.boardY = targetY
 
-    // get position of king
-    console.log(color)
+    // get position of king    
     let kingX
     let kingY
     pieces.forEach(p => {
-        if (p.color === color && p.name === "king") {
+        if (p.color === state.color && p.name === "king") {
             kingX = p.boardX
             kingY = p.boardY
         }
@@ -75,15 +76,15 @@ function canMove(pieces, piece, targetX, targetY) {
         }
         // castling
         if (!piece.hasMoved) {  
-            let rookY = color === "white" ? 7 : 0
+            let rookY = state.color === "white" ? 7 : 0
 
-            if (piece.color === color && targetY === rookY) {
+            if (piece.color === state.color && targetY === rookY) {
                 // short
                 if (targetX === 6) {
                     console.log("castle")
                     // move rook
                     pieces.forEach(x => {
-                        if (x.name === "rook" && x.color === color && x.boardX === 7) {
+                        if (x.name === "rook" && x.color === state.color && x.boardX === 7) {
                             if (x.hasMoved) {
                                 return false
                             }
@@ -96,7 +97,7 @@ function canMove(pieces, piece, targetX, targetY) {
                 if (targetX === 2) {
                     // move rook
                     pieces.forEach(x => {
-                        if (x.name === "rook" && x.color === color && x.boardX === 0) {
+                        if (x.name === "rook" && x.color === state.color && x.boardX === 0) {
                             if (x.hasMoved) {                                
                                 return false
                             }
@@ -139,7 +140,7 @@ function isOccupied(pieces, x, y) {
 }
 
 function pathClear(pieces, x, y, targetX, targetY) {
-    // console.log(`from ${x} ${y} to ${targetX} ${targetY}`)
+    console.log(`from ${x} ${y} to ${targetX} ${targetY}`)
     let test = false
     if (x === 0 && y === 2) {
         test = true
@@ -180,7 +181,7 @@ function kingInCheck(pieces, x, y) {
     // console.log(`is king at ${x} ${y} in check?`)
     let check = false
     pieces.forEach(p => {        
-        if (p.color !== color && isAttacking(pieces, p, x, y)) {
+        if (p.color !== state.color && isAttacking(pieces, p, x, y)) {
             check = true
         }
     })
@@ -191,6 +192,11 @@ function isAttacking(pieces, p, x, y) {
 
     let diffX = Math.abs(x - p.boardX)
     let diffY = Math.abs(y - p.boardY)
+
+    if (p.name === "queen") {
+        console.log(`is ${p.name} at ${p.boardX} ${p.boardY} attacking ${x} ${y}?`)  
+        console.log(`dx: ${diffX} dy: ${diffY}`)    
+    }
 
     if (p.name === "knight") {
         if ((diffX === 1 && diffY === 2) || (diffX === 2 && diffY === 1)) {
@@ -203,14 +209,13 @@ function isAttacking(pieces, p, x, y) {
             return true
         }        
     }
-    else if (p.name === "bishop" || p.name === "queen") {          
-        // console.log(`is ${p.name} at ${p.boardX} ${p.boardY} attacking?`)  
-        // console.log(`dx: ${diffX} dy: ${diffY}`)    
+    
+    if (p.name === "bishop" || p.name === "queen") {        
         if (diffX === diffY && pathClear(pieces, p.boardX, p.boardY, x, y)) {
             return true
         }
     }
-    else if (p.name === "rook" || p.name === "queen") {
+    if (p.name === "rook" || p.name === "queen") {
         if ((diffX === 0 || diffY === 0) && pathClear(pieces, p.boardX, p.boardY, x , y)) {
             return true
         }
@@ -255,6 +260,7 @@ function kingCanMove(pieces, x, y) {
                 // check if square is occupied by same color
                 if (!isOccupied(pieces, x + i, y + j)) {
                     if (!kingInCheck(pieces, x + i, y + j)) {
+                        console.log(`escape to ${x+i} ${y+j}`)
                         return true
                     }
                 }                
@@ -266,3 +272,5 @@ function kingCanMove(pieces, x, y) {
 function validSquare(x, y) {
     return x >= 0 && x <= 7 && y >= 0 && y <= 7
 }
+
+export { legalMove, checkmate }

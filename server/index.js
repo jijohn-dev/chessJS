@@ -4,8 +4,6 @@ const path = require('path')
 const socketio = require('socket.io')
 const { v4: uuidv4 } = require('uuid')
 
-require('../public/js/legalMove')
-
 const app = express()
 const server = http.createServer(app)
 const io = socketio(server)

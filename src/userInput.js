@@ -1,4 +1,18 @@
-function handleMouseDown(e) {
+import { state } from './gameState'
+import { socket } from './connection'
+import { legalMove } from './legalMove'
+import { 
+    drawBoard, 
+    drawPieces, 
+    idxToSquare, 
+    saveState,
+    changeToMove 
+} from './util'
+
+function handleMouseDown(e) {   
+    // get state vars
+    let pieces = state.pieces
+
     // get mouse coords
     let mouseX = e.offsetX
     let mouseY = e.offsetY       
@@ -8,28 +22,30 @@ function handleMouseDown(e) {
     let squareY = Math.floor(mouseY / 100)        
 
     // reflect square for black
-    if (color === "black") {
+    if (state.color === "black") {
         squareX = 7 - squareX
         squareY = 7 - squareY
     }
 
     // check if square has a piece and is user's color       
     pieces.forEach((p, index) => {
-        if (p.boardX === squareX && p.boardY === squareY && p.color === color) {                
-            selected = true
-            pieceIdx = index
+        if (p.boardX === squareX && p.boardY === squareY && p.color === state.color) {                
+            state.selected = true
+            state.pieceIdx = index
         }
     })        
 }
 
 function handleMouseUp(e) {
+    let pieces = state.pieces
+
     // get mouse coords
     let mouseX = e.offsetX
     let mouseY = e.offsetY        
 
     // drop piece
-    if (selected) {           
-        let piece = pieces[pieceIdx]
+    if (state.selected) {           
+        let piece = pieces[state.pieceIdx]
         let startX = piece.boardX
         let startY = piece.boardY
 
@@ -39,7 +55,7 @@ function handleMouseUp(e) {
             piece.offsetY = 0
             drawBoard()
             drawPieces()
-            selected = false   
+            state.selected = false   
             return
         }
 
@@ -48,7 +64,7 @@ function handleMouseUp(e) {
         let squareY = Math.floor(mouseY / 100)
 
         // reflect for black
-        if (color === "black") {
+        if (state.color === "black") {
             squareX = 7 - squareX
             squareY = 7 - squareY
         }
@@ -61,7 +77,7 @@ function handleMouseUp(e) {
         let notation = ""
 
         // check color
-        if (piece.color !== toMove) {
+        if (piece.color !== state.toMove) {
             squareX = piece.boardX
             squareY = piece.boardY
         }
@@ -113,7 +129,7 @@ function handleMouseUp(e) {
         piece.offsetX = 0
         piece.offsetY = 0
 
-        selected = false        
+        state.selected = false        
 
         // update and redraw
         pieces = pieces.filter(p => p.delete === false)            
@@ -124,6 +140,7 @@ function handleMouseUp(e) {
             changeToMove()                                
             console.log(notation)
             // send move to server
+            let toMove = state.toMove
             socket.emit("move", {pieces, toMove, notation})
         }            
     }
@@ -135,19 +152,21 @@ function handleMouseMove(e) {
     let mouseY = e.offsetY       
 
     // calculate mouse movement
-    let dx = mouseX - lastX
-    let dy = mouseY - lastY
+    let dx = mouseX - state.lastX
+    let dy = mouseY - state.lastY
 
-    lastX = mouseX
-    lastY = mouseY
+    state.lastX = mouseX
+    state.lastY = mouseY
 
     // move piece
-    if (selected) {
-        pieces[pieceIdx].offsetX += dx
-        pieces[pieceIdx].offsetY += dy
+    if (state.selected) {
+        state.pieces[state.pieceIdx].offsetX += dx
+        state.pieces[state.pieceIdx].offsetY += dy
 
         // redraw
         drawBoard()
         drawPieces()
     }
 }
+
+export { handleMouseDown, handleMouseUp, handleMouseMove }
