@@ -70,65 +70,50 @@ function handleMouseUp(e) {
             notation += idxToSquare(startX, startY)            
 
             // check if move is legal
-            legal = legalMove(piece, squareX, squareY)
+            legal = legalMove(pieces, piece, squareX, squareY)
             if (!legal) {
                 console.log("illegal move")
                 moveMade = false
             }
-
-            // check for capture or occupied                
-            pieces.forEach(p => {
-                if (p.boardX === squareX && p.boardY === squareY) {
-                    if (piece.color !== p.color) {                            
-                        capture = true
-                        p.delete = true
+            else {
+                // check for capture or occupied                
+                pieces.forEach(p => {
+                    if (p.boardX === squareX && p.boardY === squareY) {
+                        if (piece.color !== p.color) {                            
+                            capture = true
+                            p.delete = true
+                        }
+                        else {
+                            occupied = true
+                            moveMade = false
+                        }                    
                     }
-                    else {
-                        occupied = true
-                        moveMade = false
-                    }                    
+                })     
+                
+                if (capture) {
+                    notation += "x"
                 }
-            })     
-            
-            if (capture) {
-                notation += "x"
-            }
-            notation += idxToSquare(squareX, squareY)
+                notation += idxToSquare(squareX, squareY)
+            }            
         }
         
         // reset piece if move is invalid
         if (occupied || !legal) {
+            if (occupied) {
+                console.log("occupied")
+            }
             squareX = piece.boardX
             squareY = piece.boardY
         }           
 
-        // update piece
-        let lastX = piece.boardX
-        let lastY = piece.boardY
+        // update piece        
         piece.boardX = squareX
         piece.boardY = squareY
-        piece.hasMoved = true
+        piece.hasMoved = moveMade
         piece.offsetX = 0
         piece.offsetY = 0
 
-        selected = false
-
-        // reset if king is in check after move
-        let kingX
-        let kingY
-        pieces.forEach(p => {
-            if (p.color === color && p.name === "king") {
-                kingX = p.boardX
-                kingY = p.boardY
-            }
-        })
-        if (kingInCheck(kingX, kingY)) {
-            alert("Cannot move into check")
-            moveMade = false
-            piece.hasMoved = false
-            piece.boardX = lastX
-            piece.boardY = lastY
-        }
+        selected = false        
 
         // update and redraw
         pieces = pieces.filter(p => p.delete === false)            

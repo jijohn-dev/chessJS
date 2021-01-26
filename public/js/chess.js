@@ -141,6 +141,11 @@ socket.on('move', update => {
     saveState();    
     drawBoard();
     drawPieces();
+    // detect checkmate
+    const king = pieces.find(p => p.name === "king" && p.color === color)
+    if (checkmate(pieces, king)) {
+        alert("checkmate")
+    }
 })
 
 // handle illegal move message from server
