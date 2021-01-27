@@ -1,4 +1,4 @@
-function legalMove(pieces, piece, targetX, targetY) {
+const legalMove = (pieces, piece, targetX, targetY) => {
     let valid = canMove(pieces, piece, targetX, targetY)
     if (!valid) {
         return false
@@ -175,24 +175,24 @@ function pathClear(pieces, x, y, targetX, targetY) {
     return true
 }
 
-function kingInCheck(pieces, x, y) {
-    // console.log(`is king at ${x} ${y} in check?`)
-    let king
-    pieces.forEach(p => {
-        if (p.boardX === x && p.boardY === y) {
-            king = p
-        }
-    })
+const kingInCheck = (pieces, x, y) => {
+	// console.log(`is king at ${x} ${y} in check?`)   
+	let color
+	pieces.forEach(p => {
+		if (p.boardX === x && p.boardY === y) {
+			color = p.color
+		}
+	}) 
     let check = false
     pieces.forEach(p => {        
-        if (p.color !== king.color && isAttacking(pieces, p, x, y)) {
+        if (p.color !== color && isAttacking(pieces, p, x, y)) {
             check = true
         }
     })
     return check
 }
 
-function isAttacking(pieces, p, x, y) {       
+const isAttacking = (pieces, p, x, y) => {   
 
     let diffX = Math.abs(x - p.boardX)
     let diffY = Math.abs(y - p.boardY)
@@ -226,7 +226,7 @@ function isAttacking(pieces, p, x, y) {
     }
 }
 
-function checkmate(pieces, king) {    
+const checkmate = (pieces, king) => {    
     if (kingInCheck(pieces, king.boardX, king.boardY)) {
         // double check?
         let count = 0
@@ -257,13 +257,22 @@ function checkmate(pieces, king) {
     return false
 }
 
-function kingCanMove(pieces, x, y) {
+// does the king located at x, y have a legal move?
+const kingCanMove = (pieces, x, y) => {
+	// need color of king for safeSquare()
+	let color
+	pieces.forEach(p => {
+		if (p.boardX === x && p.boardY === y) {
+			color = p.color
+		}
+	})
     for (let i = -1; i <= 1; i++) {
         for (let j = -1; j <= 1; j++) {
             if (validSquare(x + i, y + j)) {
-                // check if square is occupied by same color
+				// check if square is occupied by same color
+				// TODO: escape check via capture
                 if (!isOccupied(pieces, x + i, y + j)) {
-                    if (!kingInCheck(pieces, x + i, y + j)) {
+                    if (!safeSquare(pieces, color, x + i, y + j)) {
                         console.log(`escape to ${x+i} ${y+j}`)
                         return true
                     }
@@ -273,8 +282,21 @@ function kingCanMove(pieces, x, y) {
     }
 }
 
-function validSquare(x, y) {
+// is the square at x, y under attack from opposite color?
+const safeSquare = (pieces, color, x, y) => {
+	pieces.forEach(p => {
+		if (p.color !== color && isAttacking(pieces, p, x, y)) {
+			return false
+		}
+	})
+	return true
+}
+
+const validSquare = (x, y) => {
     return x >= 0 && x <= 7 && y >= 0 && y <= 7
 }
 
-export { legalMove, checkmate }
+module.exports = {
+	legalMove,
+	checkmate
+}

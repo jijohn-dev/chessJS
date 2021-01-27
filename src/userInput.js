@@ -1,6 +1,6 @@
 import { state } from './gameState'
 import { socket } from './connection'
-import { legalMove } from './legalMove'
+// import { legalMove } from './legalMove'
 import { 
     drawBoard, 
     drawPieces, 
@@ -8,6 +8,8 @@ import {
     saveState,
     changeToMove 
 } from './util'
+
+const { legalMove } = require('../modules/chess')
 
 function handleMouseDown(e) {   
     // get state vars

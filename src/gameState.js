@@ -24,6 +24,7 @@ export const state = {
 	canvas,
 	ctx,
 	size,
+	sprites,
 	pieces,
 	history,
 	toMove,
