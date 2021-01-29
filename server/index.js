@@ -4,6 +4,8 @@ const path = require('path')
 const socketio = require('socket.io')
 const { v4: uuidv4 } = require('uuid')
 
+const { legalMove, checkmate, initializePieces, parseMove, makeMove } = require('../modules/chess/chess')
+
 const app = express()
 const server = http.createServer(app)
 const io = socketio(server)
@@ -47,7 +49,7 @@ io.on('connection', (socket) => {
 		}
 
 		// send user joined message
-		io.to(user.room).emit('message', `${user.username} has joined`)
+		socket.broadcast.to(user.room).emit('message', `${user.username} has joined`)
 
 		// send game ID to client
 		socket.emit('joined', { ...user })
@@ -58,22 +60,37 @@ io.on('connection', (socket) => {
 	})
 
 	// move
-	socket.on('move', update => {
-		console.log(`move received: ${update.notation}`)		
+	socket.on('move', move => {
+		console.log(`move received: ${move}`)
+
+		const user = getUser(socket.id)	
+		
+		// fetch game state
+		const game = games.find(g => g.id === user.room)
+		if (!game) {
+			console.log(`game not found: ${user.room}`)
+		}
+
+		// parse move notation
+		const { pieceX, pieceY, targetX, targetY } = parseMove(move)		
+		
+		// get piece
+		const piece = game.pieces.find(p => p.boardX === pieceX && p.boardY === pieceY)				
 
 		// validate move
-		// if (!legalMove(update.notation)) {
-		// 	console.log('illegal move')
-		// 	socket.emit('illegalMove', update)
-		// }
-		// else {
-		// 	// send move to room
-		// 	const user = getUser(socket.id)		
-		// 	io.to(user.room).emit('move', update)
-		// }	
+		const legal = legalMove(game.pieces, piece, targetX, targetY)
+		if (!legal) {
+			console.log('illegal move')
+			socket.emit('illegalMove', move)
+		}
+		else {
+			// update game state
+			game.pieces = makeMove(game.pieces, move)
+			game.toMove = changeToMove(game.toMove)
 
-		const user = getUser(socket.id)		
-		io.to(user.room).emit('move', update)
+			// send move to other client
+			socket.broadcast.to(user.room).emit('move', move)
+		}		
 	})
 
 	// chat messages
@@ -111,6 +128,10 @@ const createGame = ({ id, username, color }) => {
 	if (color === 'black') {
 		game.black = username
 	}
+	
+	// initialize pieces
+	initializePieces(game.pieces)
+
 	games.push(game)
 
 	return { user }
@@ -124,9 +145,9 @@ const joinGame = ({ id, username, gameId }) => {
 
 	let gameFound = false
 
-	games.forEach(game => {
-		if (game.id === gameId) {
-			gameFound = true
+	const game = games.find(g => g.id === gameId)
+	if (game) {
+		gameFound = true
 			if (game.white) {
 				game.black = username
 				color = "black"
@@ -137,13 +158,12 @@ const joinGame = ({ id, username, gameId }) => {
 				color = "white"
 				opponent = game.black
 			}
-			console.log(game);
-		}
-	})
+			// console.log(game)
+	}	
 
 	if (!gameFound) {
 		const error = "Game not found"
-		return { error };
+		return { error }
 	}
 
 	const user = { id, username, room, color, opponent }	
@@ -153,4 +173,11 @@ const joinGame = ({ id, username, gameId }) => {
 
 const getUser = id => {
 	return users.find(user => user.id === id)
+}
+
+const changeToMove = color => {
+	if (color === "white") {
+		return "black"
+	}
+	return "white"
 }

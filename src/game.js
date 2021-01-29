@@ -2,9 +2,9 @@ import { state } from './gameState'
 import { socket } from './connection'
 import { $messages } from './chat'
 import { handleMouseDown, handleMouseUp, handleMouseMove } from './userInput'
-import { initializePieces, saveState, drawBoard, drawPieces } from './util'
+import { initializePieces, saveState, drawBoard, drawPieces, changeToMove } from './util'
 
-const { checkmate } = require('../modules/chess')
+const { checkmate, makeMove } = require('../modules/chess/chess')
 
 const qs = require('qs')
 
@@ -86,14 +86,18 @@ const startGame = () => {
 }
 
 // listen for moves from the server
-socket.on('move', update => {
-    console.log(`${update.notation} received from server`)
-    // update pieces array
-    state.pieces = update.pieces
-    state.toMove = update.toMove    
+socket.on('move', move => {
+    console.log(`${move} received from server`)
+
+    // update state
+    state.pieces = makeMove(state.pieces, move)
+    changeToMove()
+    
+    // save and redraw
     saveState()    
     drawBoard()
     drawPieces()
+
     // detect checkmate
     const king = state.pieces.find(p => p.name === "king" && p.color === state.color)
     if (checkmate(state.pieces, king)) {

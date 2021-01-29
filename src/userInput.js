@@ -1,6 +1,5 @@
 import { state } from './gameState'
 import { socket } from './connection'
-// import { legalMove } from './legalMove'
 import { 
     drawBoard, 
     drawPieces, 
@@ -9,7 +8,7 @@ import {
     changeToMove 
 } from './util'
 
-const { legalMove } = require('../modules/chess')
+const { legalMove, makeMove } = require('../modules/chess/chess')
 
 function handleMouseDown(e) {   
     // get state vars
@@ -39,15 +38,13 @@ function handleMouseDown(e) {
 }
 
 function handleMouseUp(e) {
-    let pieces = state.pieces
-
     // get mouse coords
     let mouseX = e.offsetX
     let mouseY = e.offsetY        
 
     // drop piece
     if (state.selected) {           
-        let piece = pieces[state.pieceIdx]
+        let piece = state.pieces[state.pieceIdx]
         let startX = piece.boardX
         let startY = piece.boardY
 
@@ -70,10 +67,8 @@ function handleMouseUp(e) {
             squareX = 7 - squareX
             squareY = 7 - squareY
         }
-
-        let occupied = false
-        let moveMade = false
-        let capture = false
+        
+        let moveMade = false        
         let legal = false
 
         let notation = ""
@@ -85,66 +80,43 @@ function handleMouseUp(e) {
         }
         else {                
             moveMade = true                                
-            notation += idxToSquare(startX, startY)            
+            notation += idxToSquare(startX, startY)   
+            notation += idxToSquare(squareX, squareY)         
 
             // check if move is legal
-            legal = legalMove(pieces, piece, squareX, squareY)
+            legal = legalMove(state.pieces, piece, squareX, squareY)
             if (!legal) {
                 console.log("illegal move")
+                console.log(state.pieces)
                 moveMade = false
-            }
-            else {
-                // check for capture or occupied                
-                pieces.forEach(p => {
-                    if (p.boardX === squareX && p.boardY === squareY) {
-                        if (piece.color !== p.color) {                            
-                            capture = true
-                            p.delete = true
-                        }
-                        else {
-                            occupied = true
-                            moveMade = false
-                        }                    
-                    }
-                })     
-                
-                if (capture) {
-                    notation += "x"
-                }
-                notation += idxToSquare(squareX, squareY)
-            }            
+            }                 
         }
         
         // reset piece if move is invalid
-        if (occupied || !legal) {
-            if (occupied) {
-                console.log("occupied")
-            }
+        if (!legal) {            
             squareX = piece.boardX
             squareY = piece.boardY
         }           
 
         // update piece        
-        piece.boardX = squareX
-        piece.boardY = squareY
         piece.hasMoved = moveMade
         piece.offsetX = 0
         piece.offsetY = 0
 
         state.selected = false        
 
-        // update and redraw
-        pieces = pieces.filter(p => p.delete === false)            
-        drawBoard()
-        drawPieces()
+        // update and redraw                          
         if (moveMade) {
+            state.pieces = makeMove(state.pieces, notation)
             saveState()
             changeToMove()                                
             console.log(notation)
-            // send move to server
-            let toMove = state.toMove
-            socket.emit("move", {pieces, toMove, notation})
-        }            
+            // send move to server            
+            socket.emit("move", notation)
+        }   
+        
+        drawBoard()
+        drawPieces()
     }
 }
 
