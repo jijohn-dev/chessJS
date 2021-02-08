@@ -2,7 +2,7 @@ import { state } from './gameState'
 
 // draw the board
 function drawBoard() {  
-    state.ctx.fillStyle = 'darkolivegreen';
+    state.ctx.fillStyle = '#7C5CBF';
     state.ctx.fillRect(0, 0, state.canvas.width, state.canvas.height);
 
     // draw light squares

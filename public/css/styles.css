@@ -1,9 +1,15 @@
+@font-face {
+    font-family: Silkscreen;
+    src: url('../fonts/slkscr.ttf') format('truetype');
+  }
+
 /* General Styles */
 
 * {
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
+    box-sizing: border-box;   
+    font-family: 'Silkscreen'; 
 }
 
 html {
@@ -11,13 +17,13 @@ html {
 }
 
 input {
-    font-size: 14px;
+    font-size: 16px;
 }
 
 body {
     line-height: 1.4;
     color: #333333;
-    font-family: Helvetica, Arial, sans-serif;
+    font-family: 'Silkscreen', Helvetica, Arial, sans-serif;
 }
 
 h1 {
@@ -61,7 +67,7 @@ button:disabled {
 .centered-form {
     background: #333744;
     width: 100vw;
-    height: 50vh;   
+    height: 100vh;   
     display: flex;
     justify-content: center;
     align-items: center;

@@ -58,6 +58,7 @@ const legalMove = (pieces, piece, targetX, targetY) => {
 
     // check if capture occurs
     const capturedPiece = pieces.find(p => p.boardX === targetX && p.boardY === targetY)
+    // TODO: en passant capture
 
     // move piece
     piece.boardX = targetX
@@ -107,20 +108,40 @@ function canMove(pieces, piece, targetX, targetY) {
     
     if (piece.name === "pawn") {
         let step = piece.color === "white" ? -1 : 1       
-        if (targetY === piece.boardY + 1*step && targetX === piece.boardX) {
+        if (targetY === piece.boardY + step && targetX === piece.boardX) {
             return true
         }
         if (targetY === piece.boardY + 2*step && targetX === piece.boardX && !piece.hasMoved) {
             return true
         }
         // capture
-        if (targetY === piece.boardY + 1*step && diffX === 1) {
+        if (targetY === piece.boardY + step && diffX === 1) {
             let capture = false
             pieces.forEach(p => {
                 if (p.color !== piece.color && p.boardX === targetX && p.boardY === targetY) {
                     capture = true
                 }
             })
+            // en passant
+            const attackerY = piece.color === "white" ? 3 : 4            
+            if (piece.boardY === attackerY) {
+                // is enemy pawn 1 square behind target?
+                const target = pieces.find(
+                    p => p.color !== piece.color 
+                    && p.name === "pawn"
+                    && p.boardX === targetX
+                    && p.boardY === targetY - step
+                )                
+
+                // TODO: was enemy pawn moved 2 squares on previous move?
+                const enPassant = true
+
+                // move enemy pawn back 1 square to simulate normal capture
+                if (enPassant && target) {
+                    target.boardY += step
+                    capture = true
+                }
+            }
             return capture
         }               
     }    

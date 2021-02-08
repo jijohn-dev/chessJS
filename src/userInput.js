@@ -33,6 +33,15 @@ function handleMouseDown(e) {
         if (p.boardX === squareX && p.boardY === squareY && p.color === state.color) {                
             state.selected = true
             state.pieceIdx = index
+            // center piece on cursor
+            if (state.color === "black") {
+                squareX = -squareX + 7
+                squareY = -squareY + 7
+            }
+            p.offsetX = e.offsetX - (squareX * 100 + 50)
+            p.offsetY = e.offsetY - (squareY * 100 + 50)
+            drawBoard()
+            drawPieces()
         }
     })        
 }
