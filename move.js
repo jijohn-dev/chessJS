@@ -34,7 +34,13 @@ const makeMove = (pieces, move) => {
     return pieces
 }
 
-const legalMove = (pieces, piece, targetX, targetY) => {
+const legalMove = (pieces, move) => {
+    // parse move notation
+    const { pieceX, pieceY, targetX, targetY } = parseMove(move)
+
+    // get piece
+    const piece = pieces.find(p => p.boardX === pieceX && p.boardY === pieceY)
+
     // check if target is occupied
     let occupied = false
     pieces.forEach(p => {

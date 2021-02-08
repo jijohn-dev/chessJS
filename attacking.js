@@ -258,5 +258,6 @@ const pathClear = (pieces, x, y, targetX, targetY) => {
 module.exports = {
     pathClear,
     kingInCheck,
-	checkmate
+    checkmate,
+    stalemate
 }
