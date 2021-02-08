@@ -56,6 +56,9 @@ const legalMove = (pieces, piece, targetX, targetY) => {
     let lastX = piece.boardX
     let lastY = piece.boardY
 
+    // check if capture occurs
+    const capturedPiece = pieces.find(p => p.boardX === targetX && p.boardY === targetY)
+
     // move piece
     piece.boardX = targetX
     piece.boardY = targetY
@@ -70,11 +73,18 @@ const legalMove = (pieces, piece, targetX, targetY) => {
         }
     })
 
+    // TODO: hide captured piece if capture occurs
+    if (capturedPiece) {
+        capturedPiece.delete = true
+    }
     let check = kingInCheck(pieces, kingX, kingY)
 
-    // reset piece
+    // reset pieces
     piece.boardX = lastX
     piece.boardY = lastY
+    if (capturedPiece) {
+        capturedPiece.delete = false
+    }
     
     if (check) {
         console.log("cannot move into check")        

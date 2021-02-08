@@ -36,14 +36,29 @@ else {
 // get game ID from server
 socket.on('created', gameId => {
     const html = `<p>Game ID: ${gameId}</p>`
-    $messages.insertAdjacentHTML('beforeend', html)
+    $messages.insertAdjacentHTML('beforeend', html)  
 
+    // invite link
+    const copyLink = `<button id="copy">Copy Link</button>`
+    $messages.insertAdjacentHTML('beforeend', copyLink)
+    document.getElementById('copy').addEventListener('click', () => {
+        navigator.clipboard.writeText(`${location.href}&gameId=${gameId}`)
+    })
+    
+    // display empty board until opponent joins
+    state.canvas = document.getElementById('gameCanvas')
+    state.ctx = state.canvas.getContext('2d')
+    drawBoard()
+})
+
+// wait for opponent to join
+socket.on('opponentJoined', opponent => {
     // initialize game
     startGame()
 })
 
 socket.on('joined', gameInfo => {
-    const html = `<p>Game ID: ${gameInfo.id}</p>`
+    const html = `<p>Game ID: ${gameInfo.room}</p>`
     $messages.insertAdjacentHTML('beforeend', html)
     state.color = gameInfo.color
     console.log(state.color)
@@ -52,11 +67,10 @@ socket.on('joined', gameInfo => {
     startGame()
 })
 
-// initialize game
-initializePieces()
-saveState()
-
 const startGame = () => {
+    initializePieces()
+    saveState()
+
     state.canvas = document.getElementById('gameCanvas')
     state.ctx = state.canvas.getContext('2d')
 

@@ -7,14 +7,13 @@ const { v4: uuidv4 } = require('uuid')
 const { legalMove, checkmate, initializePieces, parseMove, makeMove } = require('../modules/chess/chess')
 
 const app = express()
+const publicDirectoryPath = path.join(__dirname, '../public')
+app.use(express.static(publicDirectoryPath))
+
 const server = http.createServer(app)
 const io = socketio(server)
 
-const publicDirectoryPath = path.join(__dirname, '../public')
 const port = process.env.PORT || 3000
-
-// Setup static dirctory to serve
-app.use(express.static(publicDirectoryPath))
 
 // store users
 const users = []
@@ -48,8 +47,9 @@ io.on('connection', (socket) => {
 			return callback(error)
 		}
 
-		// send user joined message
+		// send user joined message to game creator
 		socket.broadcast.to(user.room).emit('message', `${user.username} has joined`)
+		socket.broadcast.to(user.room).emit('opponentJoined', user)
 
 		// send game ID to client
 		socket.emit('joined', { ...user })
@@ -86,7 +86,13 @@ io.on('connection', (socket) => {
 		else {
 			// update game state
 			game.pieces = makeMove(game.pieces, move)
-			game.toMove = changeToMove(game.toMove)
+			// detect checkmate or stalemate
+			const king = game.pieces.find(p => p.name === 'king' && p.color !== game.toMove)
+			if (checkmate(game.pieces, king)) {
+				console.log('checkmate')
+				socket.emit('message', `${game.toMove} won by checkmate`)
+			}
+			game.toMove = changeToMove(game.toMove)			
 
 			// send move to other client
 			socket.broadcast.to(user.room).emit('move', move)
