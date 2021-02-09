@@ -1,6 +1,6 @@
 const { checkmate, stalemate } = require("./attacking")
 const { legalMove, makeMove } = require("./move")
-const { initializePieces } = require("./utils")
+const { initializePieces, loadBoard } = require("./utils")
 
 class Chess {
 	constructor() {		
@@ -26,8 +26,7 @@ class Chess {
 		// checkmate or stalemate?
 		const king = this.pieces.find(p => p.name === "king" && p.color !== this.toMove)
 		
-		if (checkmate(this.pieces, king)) {
-			console.log('checkmate')
+		if (checkmate(this.pieces, king)) {			
 			this.checkmate = true
 			this.winner = this.toMove
 		}
@@ -48,13 +47,35 @@ class Chess {
 			board.push(row)
 		}
 		this.pieces.forEach(p => {
-			board[p.boardY][p.boardX] = p.name[0]
+			let char = p.name[0]
+
 			if (p.name === 'knight') {
-				board[p.boardY][p.boardX] = 'n'
+				char = 'n'
 			}
+			if (p.color === 'black') {
+				char = char.toUpperCase()
+			}
+
+			board[p.boardY][p.boardX] = char
 		})
 		for (let i = 0; i < 8; i++) {
 			console.log(board[i].join(' '))
+		}
+	}
+
+	// load board state from char array
+	load(board, toMove) {		
+		this.pieces = loadBoard(board)
+		this.toMove = toMove
+
+		// check for mate
+		const king = this.pieces.find(p => p.name === "king" && p.color !== this.toMove)
+		if (checkmate(this.pieces, king)) {			
+			this.checkmate = true
+			this.winner = this.toMove
+		}
+		else if (stalemate(this.pieces, king)) {
+			this.stalemate = true
 		}
 	}
 }

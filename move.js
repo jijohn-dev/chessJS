@@ -1,4 +1,4 @@
-const { parseMove, initializePieces } = require('./utils')
+const { parseMove, initializePieces, charToName } = require('./utils')
 const { pathClear, kingInCheck, checkmate } = require('./attacking')
 
 const makeMove = (pieces, move) => {
@@ -17,6 +17,12 @@ const makeMove = (pieces, move) => {
 
     // get piece
     const piece = pieces.find(p => p.boardX === pieceX && p.boardY === pieceY)
+
+    // promotion (f7f8=q)
+    const backRank = piece.color === "white" ? 0 : 7
+    if (targetY === backRank) {
+        piece.name = charToName(move[5])
+    }
 
     // delete captured piece if capture is made
     const captured = pieces.find(p => p.boardX === targetX && p.boardY === targetY)
@@ -59,7 +65,7 @@ const legalMove = (pieces, move, lastMove) => {
         return false
     }
 
-    let valid = canMove(pieces, piece, targetX, targetY, lastMove)
+    let valid = canMove(pieces, piece, targetX, targetY, move, lastMove)
     if (!valid) {
         return false
     }
@@ -106,7 +112,7 @@ const legalMove = (pieces, move, lastMove) => {
     return true
 }
 
-function canMove(pieces, piece, targetX, targetY) {
+function canMove(pieces, piece, targetX, targetY, move, lastMove) {
     let diffX = Math.abs(targetX - piece.boardX)
     let diffY = Math.abs(targetY - piece.boardY)
 
@@ -118,10 +124,12 @@ function canMove(pieces, piece, targetX, targetY) {
     }
     
     if (piece.name === "pawn") {
-        let step = piece.color === "white" ? -1 : 1       
-        if (targetY === piece.boardY + step && targetX === piece.boardX) {
+        const step = piece.color === "white" ? -1 : 1 
+        // normal move      
+        if (targetY === piece.boardY + step && targetX === piece.boardX) {            
             return true
         }
+        // 2 squares on first move
         if (targetY === piece.boardY + 2*step && targetX === piece.boardX && !piece.hasMoved) {
             return true
         }

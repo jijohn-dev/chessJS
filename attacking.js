@@ -49,6 +49,10 @@ const isAttacking = (pieces, p, x, y) => {
 
 const stalemate = (pieces, king) => {
     if (!kingInCheck, king.boardX, king.boardY) {
+        // does the king have a legal move?
+        if (kingCanMove(pieces, king.boardX, king.boardY)) {
+            return false
+        }
         // TODO: is there a legal move for this color?
     }
     return false
