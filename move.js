@@ -21,7 +21,7 @@ const makeMove = (pieces, move) => {
     // delete captured piece if capture is made
     const captured = pieces.find(p => p.boardX === targetX && p.boardY === targetY)
     if (captured) {
-        console.log("capture")
+        // console.log("capture")
         captured.delete = true        
     }
     pieces = pieces.filter(p => p.delete === false)    
@@ -34,12 +34,17 @@ const makeMove = (pieces, move) => {
     return pieces
 }
 
-const legalMove = (pieces, move) => {
+const legalMove = (pieces, move, lastMove) => {
     // parse move notation
     const { pieceX, pieceY, targetX, targetY } = parseMove(move)
 
     // get piece
     const piece = pieces.find(p => p.boardX === pieceX && p.boardY === pieceY)
+
+    if (!piece) {
+        console.log(`no piece on ${pieceX} ${pieceY}`)
+        return false
+    }
 
     // check if target is occupied
     let occupied = false
@@ -50,11 +55,11 @@ const legalMove = (pieces, move) => {
     })
 
     if (occupied) {
-        console.log("occupied")
+        // console.log("occupied")
         return false
     }
 
-    let valid = canMove(pieces, piece, targetX, targetY)
+    let valid = canMove(pieces, piece, targetX, targetY, lastMove)
     if (!valid) {
         return false
     }
@@ -94,7 +99,7 @@ const legalMove = (pieces, move) => {
     }
     
     if (check) {
-        console.log("cannot move into check")        
+        // console.log("cannot move into check")        
         return false
     }
     
@@ -129,24 +134,32 @@ function canMove(pieces, piece, targetX, targetY) {
                 }
             })
             // en passant
+            // attacker must be on 5th rank (3) for white, 4th (4) for black
             const attackerY = piece.color === "white" ? 3 : 4            
             if (piece.boardY === attackerY) {
-                // is enemy pawn 1 square behind target?
-                const target = pieces.find(
-                    p => p.color !== piece.color 
-                    && p.name === "pawn"
-                    && p.boardX === targetX
-                    && p.boardY === targetY - step
-                )                
-
-                // TODO: was enemy pawn moved 2 squares on previous move?
-                const enPassant = true
-
-                // move enemy pawn back 1 square to simulate normal capture
-                if (enPassant && target) {
-                    target.boardY += step
-                    capture = true
-                }
+                // is there an enemy pawn 1 square behind target?
+                const targetPawn = pieces.find(
+                    p => p.color !== piece.color &&
+                    p.name === "pawn" &&
+                    p.boardX === targetX &&
+                    p.boardY === targetY - step
+                )        
+                
+                if (targetPawn) {
+                    // was target pawn moved 2 squares on previous move?
+                    const { startX, startY, endX, endY } = parseMove(lastMove)
+                    if (startX === targetX && 
+                        startY === targetPawn.boardY + 2*step && 
+                        endX === targetPawn.boardX &&
+                        endY === targetPawn.boardY    
+                    ) {
+                        // move enemy pawn back 1 square to simulate normal capture
+                        if (enPassant && target) {
+                            target.boardY += step
+                            capture = true
+                        }
+                    }                    
+                }                            
             }
             return capture
         }               
@@ -159,13 +172,23 @@ function canMove(pieces, piece, targetX, targetY) {
             return true
         }
         // castling
-        if (!piece.hasMoved) {  
+        if (!piece.hasMoved) {              
             let rookY = piece.color === "white" ? 7 : 0
 
             if (piece.color === piece.color && targetY === rookY) {
+                // cannot castle out of check                
+                if (kingInCheck(pieces, piece.boardX, piece.boardY)) {
+                    return false
+                }
+
+                // TODO: cannot castle through check
+                // end square is handled in legalMove()
+
                 // short
                 if (targetX === 6) {
-                    console.log("castle")
+                    if (kingInCheck(pieces, 5, rookY)) {
+                        return false
+                    }
                     // move rook
                     pieces.forEach(x => {
                         if (x.name === "rook" && x.color === piece.color && x.boardX === 7) {
@@ -178,6 +201,9 @@ function canMove(pieces, piece, targetX, targetY) {
                 }
                 // long
                 if (targetX === 2) {
+                    if (kingInCheck(pieces, 3, rookY)) {
+                        return false
+                    }
                     // move rook
                     pieces.forEach(x => {
                         if (x.name === "rook" && x.color === piece.color && x.boardX === 0) {

@@ -88,6 +88,15 @@ const initializePieces = pieces => {
     createPiece(pieces, "black", "queen", 3, 2, 3, 0)
 }
 
+const loadBoard = (board) => {
+    const pieces = []
+    board.forEach(square => {
+        if (square !== '_') {
+
+        }
+    })
+}
+
 module.exports = {
     validSquare,
     isOccupied,

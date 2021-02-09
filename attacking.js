@@ -56,14 +56,14 @@ const stalemate = (pieces, king) => {
 
 // is king checkmated?
 const checkmate = (pieces, king) => {    
-    console.log('checkmate?')
+    // console.log('checkmate?')
     if (kingInCheck(pieces, king.boardX, king.boardY)) {
         // double check?
         let count = 0
         pieces.forEach(p => {
             if (p.color !== king.color) {
                 if (isAttacking(pieces, p, king.boardX, king.boardY)) {
-                    console.log(`${p.name} is attacking`)
+                    // console.log(`${p.name} is attacking`)
                     count++
                 }
             }            
@@ -71,12 +71,12 @@ const checkmate = (pieces, king) => {
 
         let canMove = kingCanMove(pieces, king.boardX, king.boardY)
         if (canMove) {
-            console.log("king can move out of check")
+            // console.log("king can move out of check")
             return false
         }
         else if (count > 1) {
             // king must move if double check
-            console.log("double check and king cannot move")
+            // console.log("double check and king cannot move")
             return true
         }
         else {
@@ -105,6 +105,7 @@ const checkmate = (pieces, king) => {
                         attacker.color = king.color
     
                         if (!kingInCheck(pieces, king.boardX, king.boardY)) {
+                            // console.log('attacker can be captured')
                             canCapture = true
                         }
     
@@ -117,8 +118,7 @@ const checkmate = (pieces, king) => {
             })
 
             // knight cannot be blocked, only captured
-            if (attacker.name !== "knight") {
-                console.log(attacker)
+            if (attacker.name !== "knight") {                
                 // can a piece move to a square on the path from attacker to king?
                 let diffX = Math.abs(king.boardX - attacker.boardX)
                 let diffY = Math.abs(king.boardY - attacker.boardY)
@@ -144,8 +144,11 @@ const checkmate = (pieces, king) => {
                     x += stepX
                     y += stepY
                     pieces.forEach(p => {
-                        console.log(`can ${p.name} block on ${x} ${y}?`)
-                        if (p.color === king.color && isAttacking(pieces, p, x, y)) {
+                        if (p.color === king.color) {
+                            // console.log(`can ${p.name} block on ${x} ${y}?`)
+                        }
+                        
+                        if (p.color === king.color && isAttacking(pieces, p, x, y) && p.name !== 'king') {
                             // need to check if piece can be moved
                             let lastX = p.boardX
                             let lastY = p.boardY
@@ -153,6 +156,7 @@ const checkmate = (pieces, king) => {
                             p.boardY = y
 
                             if (!kingInCheck(pieces, king.boardX, king.boardY)) {
+                                // console.log('yes')
                                 canBlock = true
                             }
 
@@ -163,8 +167,12 @@ const checkmate = (pieces, king) => {
                     })
                 }
             }
+
+            // console.log(`can move: ${canMove}`)
+            // console.log(`can block: ${canBlock}`)
+            // console.log(`can capture: ${canCapture}`)
            
-            if (!canMove && !canBlock && !canCapture) {
+            if (!canMove && !canBlock && !canCapture) {                
                 return true
             }
         }
@@ -185,16 +193,16 @@ const kingCanMove = (pieces, x, y) => {
         for (let j = -1; j <= 1; j++) {
             if (validSquare(x + i, y + j)) {
 				// check if square is occupied by same color
-                // TODO: escape check via capture
-                console.log(`can king move to ${x+i} ${y+j}?`)
+                // TODO?: escape check via capture
+                // console.log(`can king move to ${x+i} ${y+j}?`)
                 if (!isBlocked(pieces, color, x + i, y + j)) {
                     if (safeSquare(pieces, color, x + i, y + j)) {
-                        console.log(`escape to ${x+i} ${y+j}`)
+                        // console.log(`escape to ${x+i} ${y+j}`)
                         return true
                     }
                 }           
                 else {
-                    console.log('occupied')
+                    // console.log('occupied')
                 }     
             }
         }
@@ -207,10 +215,10 @@ const safeSquare = (pieces, color, x, y) => {
     let safe = true
 	pieces.forEach(p => {        
         if ((p.name === "bishop" || p.name === "queen") && p.color !== color) {
-            console.log(`is ${p.color} ${p.name} at ${p.boardX} ${p.boardY} attacking ${color} king at ${x} ${y}?`)
+            // console.log(`is ${p.color} ${p.name} at ${p.boardX} ${p.boardY} attacking ${color} king at ${x} ${y}?`)
         }
 		if (p.color !== color && isAttacking(pieces, p, x, y)) {
-            console.log("not safe")
+            // console.log("not safe")
 			safe = false
 		}
 	})
@@ -218,7 +226,7 @@ const safeSquare = (pieces, color, x, y) => {
 }
 
 const pathClear = (pieces, x, y, targetX, targetY) => {
-    console.log(`from ${x} ${y} to ${targetX} ${targetY}`)   
+    // console.log(`from ${x} ${y} to ${targetX} ${targetY}`)   
     
     let test = true
 
@@ -239,19 +247,19 @@ const pathClear = (pieces, x, y, targetX, targetY) => {
         steps = diffY
     }
 
-    console.log(`steps: ${steps} dx: ${diffX} dy: ${diffY}`)
+    // console.log(`steps: ${steps} dx: ${diffX} dy: ${diffY}`)
     
     for (let i = 1; i < steps; i++) {        
         x += stepX
         y += stepY   
         if (test) {
-            console.log(`checking ${x} ${y}`)
+            // console.log(`checking ${x} ${y}`)
         }
         if (isOccupied(pieces, x, y)) {            
             return false
         }        
     }
-    console.log("path is clear")
+    // console.log("path is clear")
     return true
 }
 
