@@ -1,6 +1,8 @@
-const { Chess }  = require('./Chess')
+const { Chess }  = require('../Chess')
+const { testEnPassant } = require('./enPassant.test')
+const { testPromotion } = require('./promotion.test')
+const { testCastling } = require('./castling.test')
 
-// fixtures
 const promotionBoard = [
 	'_', '_', '_', '_', '_', '_', '_', '_', 
 	'_', 'K', '_', '_', '_', 'p', '_', '_',
@@ -58,23 +60,6 @@ const testFirstMoves = () => {
 	return true
 }
 
-const testPromotion = () => {
-	console.log("testing promotion")
-
-	const game = new Chess()
-	
-	game.load(promotionBoard, "white")
-
-	if (!game.legal('f7f8=q')) {
-		return false
-	}
-
-	game.play('f7f8=q')
-
-	game.printBoard()
-	return true
-}
-
 const testFriedLiver = () => {
 	console.log("testing fried liver game")
 	const game = new Chess()
@@ -119,7 +104,9 @@ let count = 0
 let tests = [
 	testLoad,
 	testFirstMoves,
+	testEnPassant,
 	testPromotion,
+	testCastling,
 	testFriedLiver
 ]
 
