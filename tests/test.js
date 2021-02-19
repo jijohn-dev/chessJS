@@ -2,6 +2,7 @@ const { Chess }  = require('../Chess')
 const { testEnPassant } = require('./enPassant.test')
 const { testPromotion } = require('./promotion.test')
 const { testCastling } = require('./castling.test')
+const { testStalemate } = require('./stalemate.test')
 
 const promotionBoard = [
 	'_', '_', '_', '_', '_', '_', '_', '_', 
@@ -107,6 +108,7 @@ let tests = [
 	testEnPassant,
 	testPromotion,
 	testCastling,
+	testStalemate,
 	testFriedLiver
 ]
 
