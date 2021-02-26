@@ -1,5 +1,5 @@
 const { parseMove, initializePieces, charToName } = require('./utils')
-const { pathClear, kingInCheck, checkmate, safeSquare } = require('./attacking')
+const { pathClear, kingInCheck, safeSquare } = require('./attacking')
 
 const makeMove = (pieces, move) => {
     // parse move notation
@@ -273,7 +273,6 @@ function canMove(pieces, piece, targetX, targetY, move, lastMove) {
 module.exports = {
     makeMove,
 	legalMove,
-    checkmate,    
     initializePieces,
     parseMove
 }

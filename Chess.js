@@ -1,5 +1,5 @@
-const { checkmate } = require("./attacking")
-const { stalemate } = require("./mate")
+const { kingInCheck } = require("./attacking")
+const { checkmate, stalemate } = require("./mate")
 const { legalMove, makeMove } = require("./move")
 const { initializePieces, loadBoard } = require("./utils")
 
@@ -11,6 +11,9 @@ class Chess {
 		this.toMove = "white"
 		this.stalemate = false
 		this.checkmate = false
+		this.capture = false
+		this.check = false
+		this.numPieces = 32
 
 		initializePieces(this.pieces)
 	}
@@ -48,6 +51,11 @@ class Chess {
 			// update to move
 			this.toMove = this.toMove === "white" ? "black" : "white"
 		}
+
+		// check or capture on last move?
+		this.check = kingInCheck(this.pieces, king.boardX, king.boardY)
+		this.capture = this.pieces.length !== this.numPieces
+		this.numPieces = this.pieces.length
 	}
 
 	// print the board to the console
