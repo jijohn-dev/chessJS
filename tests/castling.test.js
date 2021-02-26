@@ -26,6 +26,9 @@ const testCastling = () => {
 		return false
 	} 
 
+	game.play('e8c8')
+	// game.printBoard()
+
 	// castling through check
 	board = [
 		'R', '_', '_', '_', 'K', '_', '_', 'R', 
@@ -54,6 +57,60 @@ const testCastling = () => {
 
 	game.load(board, "white", 'd8d7')
 	if (game.legal('e1c1')) return false
+
+	// moves that look like castling
+
+	board = [
+		'R', '_', '_', '_', 'K', '_', '_', 'R', 
+		'_', '_', '_', 'Q', '_', '_', '_', '_',
+		'_', '_', '_', '_', '_', 'N', '_', '_',
+		'_', '_', '_', '_', '_', '_', '_', '_',
+		'_', '_', '_', '_', '_', '_', '_', '_',
+		'_', '_', '_', '_', '_', 'n', '_', '_',
+		'p', 'p', '_', '_', '_', 'p', 'p', 'p',
+		'_', 'k', 'r', '_', 'q', '_', '_', 'r'
+	]
+
+	game.load(board, 'white', 'd8d7')
+
+	if (!game.legal('e1g1')) return false
+	game.play('e1g1')
+
+	if (!game.legal('d7c8')) return false
+	game.play('d7c8')
+
+	game.play('b1a1')
+
+	if (!game.legal('f6g8')) return false
+	game.play('f6g8')
+
+	// game.printBoard()
+
+	// castling with no rook
+
+	board = [
+		'_', '_', '_', '_', 'K', '_', '_', '_', 
+		'_', '_', '_', '_', '_', '_', '_', '_',
+		'_', '_', '_', '_', '_', '_', '_', '_',
+		'_', '_', '_', '_', '_', '_', '_', '_',
+		'_', '_', '_', '_', '_', '_', '_', '_',
+		'_', '_', '_', '_', '_', 'n', '_', '_',
+		'p', 'p', '_', '_', '_', 'p', 'p', 'p',
+		'_', '_', '_', '_', 'k', '_', '_', '_'
+	]
+
+	game.load(board, 'white', 'g1f3')
+
+	const moves = ['e1g1', 'e1c1', 'e8g8', 'e8c8']
+	let legal = false
+	moves.forEach(move => {		
+		if (game.legal(move)) {
+			legal = true
+			console.log(move)
+		}
+	})
+
+	if (legal) return false
 
 	return true
 }

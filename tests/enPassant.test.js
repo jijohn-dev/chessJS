@@ -20,7 +20,10 @@ const testEnPassant = () => {
 	game.load(board, "white", 'a7b7')
 	game.play('c7c5')
 
+	// game.printBoard()
+
 	if (!game.legal('d5c6')) {
+		console.log('d5c6')
 		return false
 	}
 
@@ -32,6 +35,7 @@ const testEnPassant = () => {
 	game.play('e7e5')
 
 	if (!game.legal('d5e6')) {
+		console.log('d5e6')
 		return false
 	}
 
@@ -62,7 +66,7 @@ const testEnPassant = () => {
 
 	if (game.legal('d5c6')) return false
 
-	game.printBoard()
+	// game.printBoard()
 
 	return true
 }
