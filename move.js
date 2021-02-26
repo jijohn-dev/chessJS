@@ -6,19 +6,19 @@ const makeMove = (pieces, move) => {
     const { pieceX, pieceY, targetX, targetY } = parseMove(move)    
 
     // castling
-    // check if actually castling
+    // check if actually castling    
     const king = pieces.find(p => p.name === 'king' && p.boardX === pieceX && p.boardY === pieceY)
-    if (king) {
+    if (king) {        
         if (!king.hasMoved) {
             if (move === "e1g1" || move === "e8g8") {
-                const rook = pieces.find(p => p.boardX === 7 && p.boardY === pieceY && p.name === "rook")
+                const rook = pieces.find(p => p.boardX === 7 && p.boardY === pieceY && p.name === "rook")                
                 rook.boardX = 5        
             }
             if (move === "e1c1" || move === "e8c8") {
                 const rook = pieces.find(p => p.boardX === 0 && p.boardY === pieceY && p.name === "rook")
                 rook.boardX = 3
             }
-        }
+        }        
     }    
 
     // get piece

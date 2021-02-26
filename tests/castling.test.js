@@ -2,7 +2,7 @@ const { Chess } = require('../Chess')
 
 const testCastling = () => {
 	console.log("testing castling")
-	const game = new Chess()
+	let game = new Chess()
 
 	let board = [
 		'R', '_', '_', '_', 'K', '_', '_', 'R', 
@@ -26,8 +26,9 @@ const testCastling = () => {
 		return false
 	} 
 
+	game.play('e1g1')
 	game.play('e8c8')
-	// game.printBoard()
+	game.printBoard()
 
 	// castling through check
 	board = [
@@ -101,7 +102,7 @@ const testCastling = () => {
 
 	game.load(board, 'white', 'g1f3')
 
-	const moves = ['e1g1', 'e1c1', 'e8g8', 'e8c8']
+	let moves = ['e1g1', 'e1c1', 'e8g8', 'e8c8']
 	let legal = false
 	moves.forEach(move => {		
 		if (game.legal(move)) {
@@ -111,6 +112,22 @@ const testCastling = () => {
 	})
 
 	if (legal) return false
+
+	// weird asymmetrical castling bug
+	game = new Chess()
+	moves = [
+		'e2e4', 'e7e5',
+		'g1f3', 'b8c6',
+		'f1c4', 'g8f6',
+		'e1g1'
+	]
+
+	moves.forEach(move => {
+		game.play(move)
+	})
+
+	game.printBoard()
+
 
 	return true
 }
