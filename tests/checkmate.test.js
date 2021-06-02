@@ -3,7 +3,7 @@ const { Chess } = require('../Chess')
 const testCheckmate = () => {
 	console.log("testing checkmate")
 
-	const game = new Chess()
+	let game = new Chess()
 	
 	// queen h5 mate
 	let moves = [
@@ -26,7 +26,7 @@ const testCheckmate = () => {
 		return false
 	}
 
-	// xQc vs. moistcr1itkal, 2020
+	console.log('testing xQc vs. moistcr1tikal, 2020')
 	game = new Chess()
 	moves = [
 		'e2e4', 'e7e5',
@@ -36,6 +36,19 @@ const testCheckmate = () => {
 		'c2c3', 'd8f6',
 		'd4c6', 'f6f2'
 	]
+
+	moves.forEach(move => {	
+		if (!game.legal(move)) {
+			console.log(move + ' illegal')
+			return false
+		}	
+		else {
+			game.play(move)
+		}
+	})
+
+	// why can king capture defended queen?
+	//console.log(game.legal('f6f2'))
 
 	if (!game.checkmate) {
 		return false

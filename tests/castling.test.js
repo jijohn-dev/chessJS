@@ -28,7 +28,7 @@ const testCastling = () => {
 
 	game.play('e1g1')
 	game.play('e8c8')
-	game.printBoard()
+	// game.printBoard()
 
 	// castling through check
 	board = [
@@ -126,7 +126,7 @@ const testCastling = () => {
 		game.play(move)
 	})
 
-	game.printBoard()
+	// game.printBoard()
 
 
 	return true
